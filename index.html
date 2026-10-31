@@ -56,9 +56,11 @@ mark{background:var(--mark-bg,#7dd3fc);color:var(--mark-fg,#082f49);border-radiu
     <div class="brand order-1 flex items-center gap-2 text-xl font-bold tracking-tight"><span class="text-[var(--accent-color,#38bdf8)]" id="logo"></span>BookmarkHub</div>
     <div class="relative order-3 w-full md:order-2 md:w-auto md:flex-1">
       <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" id="sIc"></span>
-      <input id="q" type="search" autocomplete="off" placeholder="Search titles, URLs, tags & notes  ( / )" aria-label="Search bookmarks" class="in !rounded-xl !py-2.5 !pl-10 focus:border-[var(--accent-color,#38bdf8)]">
+      <input id="q" type="search" autocomplete="off" title="Operators: tag:ai  domain:github.com  cat:ai  folder:work  is:starred  is:broken  is:untagged. Small typos still match." placeholder="Search…  try tag:ai domain:github.com  ( / )" aria-label="Search bookmarks" class="in !rounded-xl !py-2.5 !pl-10 focus:border-[var(--accent-color,#38bdf8)]">
     </div>
     <div class="order-2 ml-auto flex items-center gap-0.5 md:order-3 md:ml-0">
+      <select id="sortSel" aria-label="Sort bookmarks" class="in !w-auto !py-2 text-xs"><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A–Z</option><option value="za">Z–A</option><option value="dom">By domain</option></select>
+      <button class="hb" data-act="selmode" id="selB" aria-label="Select multiple">☑ <span class="hidden lg:inline">Select</span></button>
       <button class="hb" data-act="view" id="viewB" aria-label="Toggle grid and list view"></button>
       <button class="hb" data-act="theme" id="themeB" aria-label="Toggle dark and light mode"></button>
       <div class="relative group">
@@ -95,6 +97,12 @@ mark{background:var(--mark-bg,#7dd3fc);color:var(--mark-fg,#082f49);border-radiu
 </main>
 
 <input type="file" id="file" accept=".html,.htm,.txt" class="hidden">
+<div id="bulk" class="fixed inset-x-0 bottom-16 z-40 mx-auto hidden w-[min(96vw,52rem)] flex-wrap items-center gap-2 rounded-2xl border border-zinc-200 bg-white p-2.5 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900">
+  <span id="bulkN" class="px-2 text-sm font-medium"></span><button class="hb" data-act="bAll">Select all</button>
+  <input id="bTag" placeholder="tag" aria-label="Tag to add" class="in !w-24 !py-1.5"><button class="hb" data-act="bTag">+ Tag</button>
+  <select id="bMove" aria-label="Move to category" class="in !w-auto !py-1.5"></select>
+  <button class="hb" data-act="bStar">★ Star</button><button class="hb text-red-500" data-act="bDel">Delete</button><button class="hb ml-auto" data-act="bDone">Done</button>
+</div>
 <aside id="panel" inert aria-label="Customize appearance" class="fixed inset-y-0 right-0 z-40 flex w-[min(92vw,22rem)] translate-x-full flex-col border-l border-zinc-200 bg-white shadow-2xl transition-transform dark:border-zinc-800 dark:bg-zinc-900">
   <div class="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-800"><h2 class="brand text-lg font-bold">Customize</h2><button class="hb !px-3" data-act="closePanel" aria-label="Close customize panel">✕</button></div>
   <div class="flex-1 space-y-6 overflow-y-auto p-4 text-sm">
@@ -114,7 +122,15 @@ mark{background:var(--mark-bg,#7dd3fc);color:var(--mark-fg,#082f49);border-radiu
     <section class="space-y-2"><h3 class="font-semibold">Custom CSS <span class="font-normal text-zinc-500">· advanced</span></h3>
       <textarea id="pCss" rows="7" spellcheck="false" maxlength="10000" class="in font-mono !text-xs" placeholder=".card { border-radius: 0; }"></textarea>
       <p class="text-xs text-zinc-500">Applies as you type. Hooks: <code>.card</code> <code>#list</code> <code>[data-tab]</code> <code>mark</code>. <code>@import</code> and remote <code>url()</code> are removed.</p></section>
-    <section class="space-y-2"><h3 class="font-semibold">Sync</h3>
+    <section class="space-y-2"><h3 class="font-semibold">Cloud sync</h3>
+      <p id="cStat" class="text-xs text-zinc-500"></p>
+      <div id="cOff" class="space-y-2"><button class="hb w-full justify-center border border-zinc-300 dark:border-zinc-700" data-act="cNew">Turn on sync</button>
+        <div class="flex gap-2"><input id="cKey" class="in !py-1.5 font-mono !text-xs" placeholder="Existing sync key"><button class="hb border border-zinc-300 dark:border-zinc-700" data-act="cLink">Link</button></div></div>
+      <div id="cOn" class="hidden space-y-2"><code id="cShow" class="block break-all rounded-lg bg-zinc-100 p-2 text-xs dark:bg-zinc-800"></code>
+        <div class="flex gap-2"><button class="hb flex-1 justify-center border border-zinc-300 dark:border-zinc-700" data-act="cNow">Sync now</button><button class="hb flex-1 justify-center border border-zinc-300 dark:border-zinc-700" data-act="cCopy">Copy key</button><button class="hb flex-1 justify-center border border-zinc-300 dark:border-zinc-700" data-act="cOffBtn">Turn off</button></div>
+        <p class="text-xs text-zinc-500">Paste this key on another device (Link) to share your library. Anyone with the key can read it, so keep it private.</p></div>
+    </section>
+    <section class="space-y-2"><h3 class="font-semibold">Appearance code</h3>
       <p class="text-xs text-zinc-500">Open tabs update live. To use this look on another device, copy the code here and apply it there.</p>
       <textarea id="pCode" rows="2" spellcheck="false" class="in font-mono !text-xs" placeholder="Paste a sync code here"></textarea>
       <div class="flex gap-2"><button class="hb flex-1 justify-center border border-zinc-300 dark:border-zinc-700" data-act="copyCode">Copy code</button><button class="hb flex-1 justify-center border border-zinc-300 dark:border-zinc-700" data-act="applyCode">Apply code</button></div></section>
@@ -366,17 +382,23 @@ const uid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36).sli
 function make(url,title,icon,added,cat,extra={}){const n=norm(url);if(!n)return null;return{id:uid(),key:n.key,url,title:title||n.host,host:n.host,domain:root(n.host),icon:icon&&icon.length<4000?icon:'',cat:cat||categorize(n.host),star:false,added:added||Date.now(),tags:extra.tags||[],folder:extra.folder||'',notes:extra.notes||'',health:extra.health||'',healthChecked:extra.healthChecked||0}}
 function parse(html){const doc=new DOMParser().parseFromString(html,'text/html'),out=[];function walk(dl,path=[]){for(const node of [...dl.children]){if(node.tagName==='DT'){const h3=[...node.children].find(x=>x.tagName==='H3');const a=[...node.children].find(x=>x.tagName==='A');if(h3){let next=[...path,h3.textContent.trim()];let sibling=node.nextElementSibling;while(sibling&&sibling.tagName!=='DL')sibling=sibling.nextElementSibling;if(sibling)walk(sibling,next)}else if(a){const href=(a.getAttribute('href')||'').trim();if(/^https?:/i.test(href)){const b=make(href,a.textContent.trim(),a.getAttribute('icon'),(+a.getAttribute('add_date')||0)*1000,null,{folder:path.join('/')});if(b)out.push(b)}}}else if(node.tagName==='DL')walk(node,path)}};const top=doc.querySelector('body > dl')||doc.querySelector('dl');if(top)walk(top);else doc.querySelectorAll('a[href]').forEach(a=>{const href=a.getAttribute('href').trim();if(/^https?:/i.test(href)){const b=make(href,a.textContent.trim(),a.getAttribute('icon'),(+a.getAttribute('add_date')||0)*1000);if(b)out.push(b)}});return out}
 const S={items:[],q:'',tab:'all',view:'grid',theme:'dark',accent:'sky',seeded:0,tag:'',folder:'',favicon:{mode:'emoji',text:'🚀',bgColor:'#3b82f6',textColor:'#ffffff',radius:25,fontSize:55,customDataUrl:''}};try{Object.assign(S,JSON.parse(localStorage.getItem(KEY)||'null')||{})}catch{};S.favicon={mode:'emoji',text:'🚀',bgColor:'#3b82f6',textColor:'#ffffff',radius:25,fontSize:55,customDataUrl:'',...(S.favicon||{})};S.q='';S.tab='all';S.tag='';S.folder='';S.items=(S.items||[]).map(b=>({...b,tags:Array.isArray(b.tags)?b.tags:[],folder:b.folder||'',notes:b.notes||'',health:b.health||'',healthChecked:b.healthChecked||0}));
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({items:S.items,view:S.view,theme:S.theme,accent:S.accent,seeded:S.seeded,favicon:S.favicon}))}catch{toast('Storage is full: export a backup to keep your changes')}};
+const save=quiet=>{try{localStorage.setItem(KEY,JSON.stringify({view:S.view,theme:S.theme,accent:S.accent,seeded:S.seeded,sort:S.sort,idb:idbOk?1:0,...(idbOk?{}:{items:S.items,favicon:S.favicon})}))}catch{toast('Storage is full: export a backup to keep your changes')}
+  if(idbOk){clearTimeout(idt);idt=setTimeout(idbFlush,250)}if(quiet!==true)scheduleSync()};
 function merge(list){const seen=new Set(S.items.map(b=>b.key));let n=0;list.forEach(b=>{if(!seen.has(b.key)){seen.add(b.key);S.items.push(b);n++}});return n}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const show=u=>u.replace(/^https?:\/\/(www\.)?/,'').replace(/\/$/,'');
-const hl=s=>{const e=esc(s);if(!S.q)return e;return e.replace(new RegExp(S.q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'),m=>`<mark>${m}</mark>`)};
-const match=b=>(!S.q||`${b.title} ${b.url} ${b.domain} ${b.notes||''} ${(b.tags||[]).join(' ')} ${b.folder||''}`.toLowerCase().includes(S.q.toLowerCase()))&&(!S.tag||(b.tags||[]).includes(S.tag))&&(!S.folder||b.folder===S.folder);
+const hl=s=>{const e=esc(s);if(PQ.q!==S.q)PQ={q:S.q,...parseQ(S.q)};if(!PQ.terms.length)return e;return e.replace(new RegExp(PQ.terms.map(t=>esc(t).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'gi'),m=>`<mark>${m}</mark>`)};
+const match=b=>{
+  if(PQ.q!==S.q)PQ={q:S.q,...parseQ(S.q)};const{f,terms}=PQ,hay=`${b.title} ${b.url} ${b.domain} ${b.notes||''} ${(b.tags||[]).join(' ')} ${b.folder||''}`.toLowerCase();
+  return terms.every(t=>fuzzy(t,hay))
+    &&f.tag.every(t=>(b.tags||[]).some(x=>x.toLowerCase().includes(t)))&&f.domain.every(d=>b.host.includes(d))&&f.cat.every(c=>b.cat.includes(c))
+    &&f.folder.every(x=>(b.folder||'').toLowerCase().includes(x))&&f.is.every(x=>x.startsWith('star')?b.star:x==='broken'?b.health==='broken'||b.health==='unreachable'||b.health==='bad':x==='blocked'?b.health==='blocked':x==='untagged'?!(b.tags||[]).length:true)
+    &&(!S.tag||(b.tags||[]).includes(S.tag))&&(!S.folder||b.folder===S.folder)};
 const inTab=(b,t)=>t==='all'||(t==='star'?b.star:b.cat===t), BADGE='rounded-md bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400';
 const fav=b=>`<img src="${esc(b.icon||'https://www.google.com/s2/favicons?domain='+b.host+'&sz=64')}" alt="" loading="lazy" data-l="${esc((b.domain[0]||'?').toUpperCase())}" class="h-8 w-8 shrink-0 rounded-lg bg-zinc-100 object-contain p-1 dark:bg-zinc-800">`;
 const ab=(act,id,icon,label,color,cls='')=>`<button data-act="${act}" data-id="${esc(id)}" title="${label}" aria-label="${label}" class="rounded-md p-1.5 ${color} hover:bg-zinc-200/70 dark:hover:bg-zinc-800">${ic(icon,'h-4 w-4 '+cls)}</button>`;
 const acts=b=>`<a href="${esc(b.url)}" target="_blank" rel="noopener noreferrer" title="Open link" class="rounded-md p-1.5 text-zinc-400 hover:text-[var(--accent-color,#38bdf8)]">${ic('ext')}</a>`+ab('copy',b.id,'copy','Copy URL','text-zinc-400')+ab('star',b.id,'star',b.star?'Remove favorite':'Add favorite',b.star?'text-amber-400':'text-zinc-400',b.star?'fill-current':'')+ab('edit',b.id,'mark','Edit bookmark','text-zinc-400')+ab('del',b.id,'trash','Delete','text-zinc-400 hover:text-red-500');
 const tagPills=b=>(b.tags||[]).map(t=>`<button data-tag="${esc(t)}" class="rounded-full border border-sky-500/20 bg-sky-500/10 px-2 py-0.5 text-[11px] text-sky-600 hover:bg-sky-500/20 dark:text-sky-300">#${esc(t)}</button>`).join('');
-const card=b=>`<article class="card flex flex-col justify-between rounded-xl border border-zinc-200 bg-white p-3.5 shadow-sm hover:border-[var(--accent-color,#38bdf8)] hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900 ${S.view==='list'?'sm:flex-row sm:items-center':''}"><div class="flex min-w-0 gap-3">${fav(b)}<div class="min-w-0 flex-1">${`<a href="${esc(b.url)}" target="_blank" rel="noopener noreferrer" class="${S.view==='grid'?'line-clamp-2':'block'} break-words text-sm font-medium leading-snug hover:text-[var(--accent-color,#38bdf8)]">${hl(b.title)} ${ic('ext','ml-1 inline h-3 w-3 opacity-50')}</a>`}<p class="mt-0.5 truncate text-xs text-zinc-500">${hl(show(b.url))}</p>${b.notes?`<p class="mt-1 line-clamp-1 text-xs text-zinc-400 italic">📝 ${hl(b.notes)}</p>`:''}${b.folder?`<p class="mt-1 truncate text-xs text-violet-500">📁 ${esc(b.folder)}</p>`:''}${hb(b)}<div class="mt-2 flex flex-wrap gap-1">${tagPills(b)}</div></div></div><div class="mt-3 flex items-center justify-between gap-2 sm:mt-0"><span class="${BADGE}">${hl(b.domain)}</span><div class="flex shrink-0">${acts(b)}</div></div></article>`;
+const card=b=>`<article class="card flex flex-col justify-between rounded-xl border border-zinc-200 bg-white p-3.5 shadow-sm hover:border-[var(--accent-color,#38bdf8)] hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900 ${S.view==='list'?'sm:flex-row sm:items-center':''} ${S.sel.has(b.id)?'ring-2 ring-[var(--accent-color,#38bdf8)]':''}"><div class="flex min-w-0 gap-3">${S.selMode?`<input type="checkbox" data-sel="${b.id}" aria-label="Select ${esc(b.title)}" ${S.sel.has(b.id)?'checked':''} class="mt-1.5 h-4 w-4 shrink-0 accent-[var(--accent-color,#38bdf8)]">`:''}${fav(b)}<div class="min-w-0 flex-1">${`<a href="${esc(b.url)}" target="_blank" rel="noopener noreferrer" class="${S.view==='grid'?'line-clamp-2':'block'} break-words text-sm font-medium leading-snug hover:text-[var(--accent-color,#38bdf8)]">${hl(b.title)} ${ic('ext','ml-1 inline h-3 w-3 opacity-50')}</a>`}<p class="mt-0.5 truncate text-xs text-zinc-500">${hl(show(b.url))}</p>${b.notes?`<p class="mt-1 line-clamp-1 text-xs text-zinc-400 italic">📝 ${hl(b.notes)}</p>`:''}${b.folder?`<p class="mt-1 truncate text-xs text-violet-500">📁 ${esc(b.folder)}</p>`:''}${hb(b)}<div class="mt-2 flex flex-wrap gap-1">${tagPills(b)}</div></div></div><div class="mt-3 flex items-center justify-between gap-2 sm:mt-0"><span class="${BADGE}">${hl(b.domain)}</span><div class="flex shrink-0">${acts(b)}</div></div></article>`;
 const empty=()=>`<div class="mx-auto flex max-w-sm flex-col items-center py-20 text-center"><div class="mb-4 grid h-16 w-16 place-items-center rounded-2xl bg-[var(--accent-color,#38bdf8)]/10 text-[var(--accent-color,#38bdf8)]">${ic('mark','h-8 w-8')}</div><h3 class="brand text-lg font-bold">Nothing here yet</h3><p class="mt-1 text-sm text-zinc-500">Try another filter, import bookmarks, or add a link.</p><button data-act="add" class="mt-4 rounded-lg bg-[var(--accent-color,#38bdf8)] px-3 py-2 text-sm font-semibold text-white">Add bookmark</button></div>`;
 
 function render(swap){
@@ -393,7 +415,7 @@ function render(swap){
   $('#tagsBar').innerHTML=Object.entries(tags).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([t,n])=>`<button data-tag="${esc(t)}" class="rounded-full px-2.5 py-1 text-xs ${S.tag===t?'bg-[var(--accent-color,#38bdf8)] text-white':'bg-zinc-200 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300'}">#${esc(t)} <span class="opacity-70">${n}</span></button>`).join('')+(S.tag?'<button data-tag="" class="hb !py-1 text-xs">Clear tag ×</button>':'');
   const folders=[...new Set(S.items.map(b=>b.folder).filter(Boolean))].sort();
   $('#folderFilter').innerHTML='<option value="">All folders</option>'+folders.map(f=>`<option value="${esc(f)}" ${S.folder===f?'selected':''}>${esc(f)}</option>`).join('');
-  const rows=found.filter(b=>inTab(b,S.tab)).sort((a,b)=>b.added-a.added);
+  const rows=found.filter(b=>inTab(b,S.tab)).sort(SORTS[S.sort]||SORTS.new);S.vis=rows.map(b=>b.id);$('#sortSel').value=S.sort||'new';renderBulk();
   const box=$('#list');
   box.className=rows.length?(S.view==='grid'?'grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4':'flex flex-col gap-1.5'):'';
   box.innerHTML=rows.length?rows.map(card).join(''):empty();
@@ -510,7 +532,7 @@ document.addEventListener('click',e=>{
   else if(act==='shortcuts')shortcuts();
   else if(act==='faviconStudio')openFaviconStudio();
   else if(act==='closeFavicon')$('#faviconDlg').close();
-  else if(act==='palette')openPalette();else if(act==='customize')openPanel();else if(act==='closePanel')openPanel(false);else if(act==='resetPrefs')resetPrefs();else if(act==='copyCode')copyCode();else if(act==='applyCode')applyCode();
+  else if(act==='palette')openPalette();else if(act==='customize')openPanel();else if(act==='selmode'||act==='bDone')toggleSel();else if(act==='bAll')bulkOp('all');else if(act==='bTag')bulkOp('tag',$('#bTag').value);else if(act==='bStar')bulkOp('star');else if(act==='bDel')bulkOp('del');else if(act==='cNew')cloudOn();else if(act==='cLink')cloudOn($('#cKey').value);else if(act==='cNow')syncNow();else if(act==='cCopy')navigator.clipboard.writeText(fmtKey(SY.key)).then(()=>toast('Sync key copied'));else if(act==='cOffBtn')cloudOff();else if(act==='closePanel')openPanel(false);else if(act==='resetPrefs')resetPrefs();else if(act==='copyCode')copyCode();else if(act==='applyCode')applyCode();
   else if(act==='closeInfo')$('#infoDlg').close();
   else if(act==='import')$('#file').click();
   else if(act==='clear'){S.q='';$('#q').value='';render()}
@@ -525,7 +547,7 @@ $('#accentSelect').addEventListener('change',e=>{S.accent=e.target.value;applyAc
 document.addEventListener('keydown',e=>{
   const typing=/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName),paletteOpen=$('#paletteDlg').open;
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openPalette();return}
-  if(e.key==='Escape'){if(!$('#panel').inert)openPanel(false);if($('#infoDlg').open)$('#infoDlg').close();if(paletteOpen)$('#paletteDlg').close();if(document.activeElement===$('#q')){$('#q').value='';S.q='';render()}return}
+  if(e.key==='Escape'){if(S.selMode)toggleSel();if(!$('#panel').inert)openPanel(false);if($('#infoDlg').open)$('#infoDlg').close();if(paletteOpen)$('#paletteDlg').close();if(document.activeElement===$('#q')){$('#q').value='';S.q='';render()}return}
   if(paletteOpen){
     const buttons=[...$('#paletteResults').querySelectorAll('[data-palette-id]')]; let idx=buttons.findIndex(b=>b.classList.contains('bg-zinc-100'));
     if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();idx=(idx+(e.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length;buttons.forEach((b,j)=>b.classList.toggle('bg-zinc-100',j===idx));buttons[idx]?.scrollIntoView({block:'nearest'});return}
@@ -656,7 +678,7 @@ function applyPref(){
   a.textContent=css;u.textContent=safeCss(P.css);document.head.append(a,u);   // appended last so they win over Tailwind's sheet
   document.documentElement.style.fontSize=P.scale+'%';
 }
-function setPref(patch){P=clean({...P,...patch,updated:Date.now()});try{localStorage.setItem(PK,JSON.stringify(P))}catch{}applyPref()}
+function setPref(patch,keep){P=clean({...P,...patch,updated:keep?patch.updated:Date.now()});try{localStorage.setItem(PK,JSON.stringify(P))}catch{}applyPref();if(!keep)scheduleSync()}
 function adopt(){if(P.preset&&P.preset!==S.accent){S.accent=P.preset;applyAccent(P.preset)}if(P.theme&&P.theme!==S.theme)S.theme=P.theme}
 addEventListener('storage',e=>{if(e.key!==PK||!e.newValue)return;try{const n=clean(JSON.parse(e.newValue));if(n.updated<P.updated)return;P=n;adopt();applyPref();syncPanel();render()}catch{}});
 
@@ -694,9 +716,101 @@ function applyPreset(k){const p=PRESETS[k];setPref({accent:p.accent||'',hl:p.hl|
 panel.addEventListener('click',e=>{const b=e.target.closest('[data-preset]');if(b)applyPreset(b.dataset.preset)});
 applyPref();syncPanel();
 
+/* ---------- Storage safety: bookmarks live in IndexedDB, small prefs in localStorage ---------- */
+let idbOk=!!window.indexedDB,idt;
+const IDB=(()=>{let db;const open=()=>db||(db=new Promise((ok,no)=>{const r=indexedDB.open('bookmarkhub',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}));
+  const tx=async(m,f)=>{const d=await open();return new Promise((ok,no)=>{const t=d.transaction('kv',m),o=f(t.objectStore('kv'));t.oncomplete=()=>ok(o.result);t.onerror=()=>no(t.error)})};
+  return{get:k=>tx('readonly',s=>s.get(k)),set:(k,v)=>tx('readwrite',s=>s.put(v,k))}})();
+const idbFlush=()=>IDB.set('data',{items:S.items,favicon:S.favicon}).catch(()=>{idbOk=false;save(true);toast('IndexedDB unavailable, using localStorage')});
+const fixItems=a=>(a||[]).map(b=>({...b,tags:Array.isArray(b.tags)?b.tags:[],folder:b.folder||'',notes:b.notes||'',health:b.health||'',healthChecked:b.healthChecked||0}));
+
+/* ---------- Sorting & bulk actions ---------- */
+S.sort=S.sort||'new';S.sel=new Set();S.selMode=false;S.vis=[];
+const ci=(a,b)=>a.localeCompare(b,undefined,{sensitivity:'base'});
+const SORTS={new:(a,b)=>b.added-a.added,old:(a,b)=>a.added-b.added,az:(a,b)=>ci(a.title,b.title),za:(a,b)=>ci(b.title,a.title),dom:(a,b)=>ci(a.domain,b.domain)||ci(a.title,b.title)};
+function renderBulk(){const on=S.selMode,b=$('#bulk');b.classList.toggle('hidden',!on);b.classList.toggle('flex',on);$('#bulkN').textContent=`${S.sel.size} selected`;$('#selB').setAttribute('aria-pressed',on)}
+function toggleSel(){S.selMode=!S.selMode;S.sel.clear();render()}
+function bulkOp(op,v){
+  const sel=S.items.filter(b=>S.sel.has(b.id));
+  if(op==='all')S.vis.forEach(id=>S.sel.add(id));
+  else if(!sel.length)return toast('Select some links first');
+  else if(op==='tag'){const t=(v||'').trim().toLowerCase().replace(/^#/,'');if(!t)return toast('Type a tag first');sel.forEach(b=>{if(!b.tags.includes(t))b.tags.push(t)});$('#bTag').value='';toast(`Tagged ${sel.length} link${sel.length>1?'s':''} #${t}`)}
+  else if(op==='move'){sel.forEach(b=>b.cat=v);toast(`Moved ${sel.length} to ${(CATS.find(c=>c[0]===v)||[,v])[1]}`)}
+  else if(op==='star'){const on=!sel.every(b=>b.star);sel.forEach(b=>b.star=on)}
+  else if(op==='del'){const prev=S.items.slice();S.items=S.items.filter(b=>!S.sel.has(b.id));S.sel.clear();save();render();return toast(`Deleted ${sel.length} link${sel.length>1?'s':''}`,()=>{S.items=prev;save();render()})}
+  save();render();
+}
+$('#sortSel').addEventListener('change',e=>{S.sort=e.target.value;save();render(true)});
+$('#bMove').innerHTML='<option value="">Move to…</option>'+CATS.map(([id,l])=>`<option value="${id}">${l}</option>`).join('');
+$('#bMove').addEventListener('change',e=>{if(e.target.value)bulkOp('move',e.target.value);e.target.value=''});
+$('#bTag').addEventListener('keydown',e=>{if(e.key==='Enter')bulkOp('tag',e.target.value)});
+document.addEventListener('change',e=>{const id=e.target.dataset?.sel;if(!id)return;e.target.checked?S.sel.add(id):S.sel.delete(id);e.target.closest('article').classList.toggle('ring-2',e.target.checked);renderBulk()});
+
+/* ---------- Search: operators + typo tolerance ---------- */
+let PQ={q:null};
+function parseQ(q){const f={tag:[],domain:[],cat:[],is:[],folder:[]},terms=[];
+  (q.match(/\w+:"[^"]*"|\w+:\S+|"[^"]*"|\S+/g)||[]).forEach(t=>{const m=t.match(/^(tag|domain|cat|is|folder):(.+)$/i),c=s=>s.replace(/^"|"$/g,'').toLowerCase();
+    m?f[m[1].toLowerCase()].push(c(m[2])):terms.push(c(t))});return{f,terms}}
+function lev(a,b){const d=[...Array(b.length+1).keys()];for(let i=1;i<=a.length;i++){let p=d[0];d[0]=i;for(let j=1;j<=b.length;j++){const t=d[j];d[j]=Math.min(d[j]+1,d[j-1]+1,p+(a[i-1]===b[j-1]?0:1));p=t}}return d[b.length]}
+const fuzzy=(t,hay)=>hay.includes(t)||(t.length>3&&hay.split(/[^a-z0-9]+/).some(w=>Math.abs(w.length-t.length)<=2&&lev(t,w)<=(t.length>6?2:1)));
+
+/* ---------- Cloud sync: end-to-end encrypted, three-way merge ---------- */
+const SK='bookmarkhub.sync.v1',te=new TextEncoder(),SYL=new Set(['id','icon','health','status','healthChecked']);
+let SY=null,CK=null,syncBusy=0,stm;try{SY=JSON.parse(localStorage.getItem(SK))}catch{}
+const b64=u=>{let s='';for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode(...u.subarray(i,i+8192));return btoa(s)},unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const pub=b=>Object.fromEntries(Object.entries(b).filter(([k])=>!SYL.has(k)));
+const fp=b=>{const s=JSON.stringify(Object.entries(pub(b)).sort(([x],[y])=>x<y?-1:1));let h=5381;for(let i=0;i<s.length;i++)h=(h*33^s.charCodeAt(i))>>>0;return h.toString(36)+s.length};
+const sig=a=>a.map(b=>b.key+fp(b)).sort().join('|'),snap=a=>Object.fromEntries(a.map(b=>[b.key,fp(b)]));
+const fmtKey=k=>k.match(/.{1,5}/g).join('-');
+async function mkKey(key){const m=await crypto.subtle.importKey('raw',te.encode(key),'PBKDF2',false,['deriveKey','deriveBits']),p=s=>({name:'PBKDF2',salt:te.encode(s),iterations:150000,hash:'SHA-256'});
+  return{key,aes:await crypto.subtle.deriveKey(p('bh-enc'),m,{name:'AES-GCM',length:256},false,['encrypt','decrypt']),
+    id:[...new Uint8Array(await crypto.subtle.deriveBits(p('bh-id'),m,256))].map(x=>x.toString(16).padStart(2,'0')).join('')}}   // id (sent) and cipher key (never sent) come from separate derivations
+async function seal(o,k){const iv=crypto.getRandomValues(new Uint8Array(12)),ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},k.aes,te.encode(JSON.stringify(o)))),u=new Uint8Array(12+ct.length);u.set(iv);u.set(ct,12);return b64(u)}
+async function unseal(s,k){const u=unb64(s);return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:u.slice(0,12)},k.aes,u.slice(12))))}
+async function kv(k,method,body){const r=await fetch('/api/sync',{method,headers:{'content-type':'application/json','x-sync-id':k.id},body:body&&JSON.stringify(body)});
+  if(r.status===501)throw Error('Sync storage isn’t set up on this deployment yet');if(!r.ok&&r.status!==409)throw Error('Sync failed (HTTP '+r.status+')');return{status:r.status,...await r.json()}}
+function merge3(L,R,base){   // per link: unchanged side yields to the changed side; if both changed, this device wins
+  const lm=new Map(L.map(b=>[b.key,b])),rm=new Map(R.map(b=>[b.key,b])),out=[],adopt1=r=>({id:uid(),icon:'',health:'',status:0,healthChecked:0,...r});
+  new Set([...lm.keys(),...rm.keys()]).forEach(k=>{const l=lm.get(k),r=rm.get(k),bh=base[k];
+    if(l&&r)out.push(fp(l)===fp(r)||fp(r)===bh?l:fp(l)===bh?{...l,...pub(r)}:l);
+    else if(l){if(bh===undefined||fp(l)!==bh)out.push(l)}                  // else: deleted on the other device
+    else if(bh===undefined||fp(r)!==bh)out.push(adopt1(r))});               // else: deleted here
+  return out}
+async function syncNow(){
+  if(!SY||syncBusy)return;syncBusy=1;setStat('Syncing…');
+  try{
+    const k=CK&&CK.key===SY.key?CK:(CK=await mkKey(SY.key));let done=0;
+    for(let n=0;n<3&&!done;n++){
+      const r=await kv(k,'GET'),rem=r.blob?await unseal(r.blob,k):{items:[],prefs:null};
+      S.items=merge3(S.items,fixItems(rem.items),(await IDB.get('base'))||{});
+      if(rem.prefs&&rem.prefs.updated>P.updated){setPref(rem.prefs,true);adopt()}
+      const same=sig(S.items)===sig(rem.items||[])&&(rem.prefs?.updated||0)>=P.updated;
+      let rev=r.rev;
+      if(!same){const p=await kv(k,'PUT',{baseRev:r.rev,blob:await seal({items:S.items.map(pub),prefs:P},k)});if(p.status===409)continue;rev=p.rev}
+      await IDB.set('base',snap(S.items));SY.rev=rev;done=1}
+    if(!done)throw Error('Sync conflict, try again');
+    SY.last=Date.now();localStorage.setItem(SK,JSON.stringify(SY));save(true);render();syncPanel();setStat();
+  }catch(e){setStat('⚠ '+e.message)}finally{syncBusy=0}
+}
+function scheduleSync(){clearTimeout(stm);if(SY)stm=setTimeout(syncNow,2500)}
+function setStat(m){const on=!!SY;$('#cOff').classList.toggle('hidden',on);$('#cOn').classList.toggle('hidden',!on);
+  $('#cStat').textContent=m||(on?(SY.last?`Synced ${new Date(SY.last).toLocaleTimeString()} · bookmarks and settings, end-to-end encrypted`:'Not synced yet'):'Off: bookmarks and settings stay on this device.');
+  if(on)$('#cShow').textContent=fmtKey(SY.key).slice(0,5)+'-•••••-•••••-•••••'}
+function cloudOn(existing){
+  let key=(existing||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  if(existing!==undefined&&key.length<16)return toast('Paste the full sync key from your other device');
+  if(!key)key=[...crypto.getRandomValues(new Uint8Array(20))].map(x=>'abcdefghjkmnpqrstuvwxyz23456789'[x%31]).join('');
+  SY={key,rev:0,last:0};IDB.set('base',{});localStorage.setItem(SK,JSON.stringify(SY));setStat();syncNow();if(!existing)toast('Sync on. Copy your key to link other devices.')}
+function cloudOff(){SY=null;localStorage.removeItem(SK);IDB.set('base',{});setStat();toast('Sync turned off on this device')}
+addEventListener('visibilitychange',()=>{if(!document.hidden)syncNow()});setInterval(()=>{if(!document.hidden)syncNow()},90000);
+addEventListener('pagehide',()=>{if(idbOk)idbFlush()});
+
 ['logo:mark','sIc:search','upIc:up','dnIc:down','plIc:plus'].forEach(p=>{const[id,n]=p.split(':');$('#'+id).innerHTML=ic(n,id==='logo'?'h-6 w-6 fill-current':'h-4 w-4')});
-if(!S.seeded){const seed=$('#seed'),n=merge(parse(seed.textContent)),d=+seed.dataset.dupes||0;S.seeded=1;save();if(n)toast(`Loaded ${n} unique links · ${d} duplicates removed`)}
-render();
+(async()=>{
+  if(idbOk)try{const d=await IDB.get('data');if(d){S.items=fixItems(d.items);S.favicon={...S.favicon,...d.favicon}}await idbFlush();save(true)}catch{idbOk=false;save(true)}   // also migrates legacy localStorage data
+  if(!S.seeded){const seed=$('#seed'),n=merge(parse(seed.textContent)),d=+seed.dataset.dupes||0;S.seeded=1;save();if(n)toast(`Loaded ${n} unique links · ${d} duplicates removed`)}
+  setStat();render();if(typeof updateFavicon==='function')updateFavicon();syncNow();
+})();
 })();
 </script>
 </body>
