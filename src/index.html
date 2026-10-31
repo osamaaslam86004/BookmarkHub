@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BookmarkHub</title>
+<link id="favicon-ico" rel="icon" type="image/png" href=""><link id="favicon-apple" rel="apple-touch-icon" href="">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./css/tailwind.css">
+<script type="module" src="./js/ui.js"></script>
+</head>
+
+<body class="min-h-screen bg-zinc-50 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
+
+<header class="sticky top-0 z-20 border-b border-zinc-200 bg-zinc-50/85 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/85">
+  <div class="mx-auto flex max-w-
+7xl flex-wrap items-center gap-x-4 gap-y-2 px-4 pt-3">
+    <div class="brand order-1 flex items-center gap-2 text-xl font-bold tracking-tight"><span class="text-[var(--accent-color,#38bdf8)]" id="logo"></span>BookmarkHub</div>
+    <div class="relative order-3 w-full md:order-2 md:w-auto md:flex-1">
+      <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" id="sIc"></span>
+      <input id="q" type="search" autocomplete="off" title="Operators: tag:ai  domain:github.com  cat:ai  folder:work  is:starred  is:broken  is:untagged. Small typos still match." placeholder="Search…  try tag:ai domain:github.com  ( / )" aria-label="Search bookmarks" class="in !rounded-xl !py-2.5 !pl-10 focus:border-[var(--accent-color,#38bdf8)]">
+    </div>
+    <div class="order-2 ml-auto flex items-center gap-0.5 md:order-3 md:ml-0">
+      <select id="sortSel" aria-label="Sort bookmarks" class="in !w-auto !py-2 text-xs"><option value="new">Newest</option><option value="old">Oldest</option><option value="az">A–Z</option><option value="za">Z–A</option><option value="dom">By domain</option></select>
+      <button class="hb" data-act="selmode" id="selB" aria-label="Select multiple">☑ <span class="hidden lg:inline">Select</span></button>
+      <button class="hb" data-act="view" id="viewB" aria-label="Toggle grid and list view"></button>
+      <button class="hb" data-act="theme" id="themeB" aria-label="Toggle dark and light mode"></button>
+      <div class="relative group">
+        <button class="hb" aria-label="Advanced menu">⚙️ <span class="hidden lg:inline">Tools</span></button>
+        <div class="absolute right-0 mt-1 hidden w-48 rounded-xl border border-zinc-200 bg-white p-1 shadow-xl group-hover:block dark:border-zinc-800 dark:bg-zinc-900 z-30">
+          <button data-act="import" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"><span id="upIc"></span> Import Bookmarks</button>
+          <button data-act="export" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"><span id="dnIc"></span> Export JSON</button>
+          <button data-act="exportHtml" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800">🌐 Export Netscape HTML</button>
+          <button data-act="health" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800">⚕️ Check Link Health</button>
+          <button data-act="tagManager" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800">🏷️ Manage Tags</button>
+          <button data-act="stats" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800">📊 Library Analytics</button>
+          <button data-act="palette" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800">⌕ Command Palette (Ctrl+K)</button>
+          <button data-act="shortcuts" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800">⌨️ Keyboard Shortcuts</button>
+          <button data-act="customize" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800">🎨 Customize Appearance</button>
+          <button data-act="faviconStudio" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800">✨ Favicon Studio</button>
+        </div>
+      </div>
+      <button data-act="add" class="ml-1 inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-color,#38bdf8)] px-3 py-2 text-sm font-semibold text-white hover:opacity-90"><span id="plIc"></span>Add</button>
+    </div>
+  </div>
+  <nav i
+d="tabs" class="noscroll mx-auto mt-2 flex max-w-7xl gap-1 overflow-x-auto px-3" aria-label="Categories"></nav>
+  <div class="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-4 pb-2 pt-1">
+    <div id="tagsBar" class="flex flex-wrap gap-1.5"></div>
+    <div class="ml-auto flex items-center gap-2 text-xs text-zinc-500">
+      <label>Folder <select id="folderFilter" class="in !w-auto !py-1"><option value="">All folders</option></select></label>
+      <label>Accent <select id="accentSelect" class="in !w-auto !py-1 font-medium capitalize"><option value="sky">Sky</option><option value="emerald">Emerald</option><option value="violet">Violet</option><option value="rose">Rose</option><option value="amber">Amber</option></select></label>
+    </div>
+  </div>
+</header>
+
+<main class="mx-auto max-w-7xl px-4 py-5">
+  <p id="meta" class="mb-3 min-h-5 text-sm text-zinc-500"></p>
+  <div id="list"></div>
+</main>
+
+<input type="file" id="file" accept=".html,.htm,.txt" class="hidden">
+<div id="bulk" class="fixed inset-x-0 bottom-16 z-40 mx-auto hidden w-[min(96vw,52rem)] flex-wrap items-center gap-2 rounded-2xl border border-zinc-200 bg-white p-2.5 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900">
+  <span id="bulkN" class="px-2 text-sm font-medium"></span><button class="hb" data-act="bAll">Select all</button>
+  <input id="bTag" placeholder="tag" aria-label="Tag to add" class="in !w-24 !py-1.5"><button class="hb" data-act="bTag">+ Tag</button>
+  <select id="bMove" aria-label="Move to category" class="in !w-auto !py-1.5"></select>
+  <button class="hb" data-act="bStar">★ Star</button><button class="hb text-red-500" data-act="bDel">Delete</button><button class="hb ml-auto" data-act="bDone">Done</button>
+</div>
+<aside id="panel" inert aria-label="Customize appearance" class="fixed inset-y-0 right-0 z-40 flex w-[min(92vw,22rem)] translate-x-full flex-col border-l border-zinc-200 bg-white shadow-2xl transition-transform dark:border-zinc-800 dark:bg-zinc-900">
+  <div class="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-800"><h2 class="brand text-lg font-bold">Customize</h2><button class="hb !px-3" data-act="closePanel" aria-label="Close customize panel">✕</button></div>
+  <div class="flex-1 space-y-6 overflow-y-auto p-4 text-sm">
+    <section class="space-y-3"><h3 class="font-semibold">Theme preset</h3><div id="pPresets" class="grid grid-cols-3 gap-2"><button data-preset="dark" class="rounded-lg border border-zinc-300 px-2 py-2 text-xs font-medium ring-[var(--accent-color,#38bdf8)] dark:border-zinc-700"><span class="mb-1.5 block h-4 rounded" style="background:linear-gradient(90deg,#09090b 55%,#38bdf8 55%)"></span>Dark</button><button data-preset="light" class="rounded-lg border border-zinc-300 px-2 py-2 text-xs font-medium ring-[var(--accent-color,#38bdf8)] dark:border-zinc-700"><span class="mb-1.5 block h-4 rounded" style="background:linear-gradient(90deg,#fafafa 55%,#38bdf8 55%)"></span>Light</button><button data-preset="contrast" class="rounded-lg border border-zinc-300 px-2 py-2 text-xs font-medium ring-[var(--accent-color,#38bdf8)] dark:border-zinc-700"><span class="mb-1.5 block h-4 rounded" style="background:linear-gradient(90deg,#000000 55%,#ffd60a 55%)"></span>High contrast</button><button data-preset="sepia" class="rounded-lg border border-zinc-300 px-2 py-2 text-xs font-medium ring-[var(--accent-color,#38bdf8)] dark:border-zinc-700"><span class="mb-1.5 block h-4 rounded" style="background:linear-gradient(90deg,#f1e6cf 55%,#b45309 55%)"></span>Sepia</button><button data-preset="cyber" class="rounded-lg border border-zinc-300 px-2 py-2 text-xs font-medium ring-[var(--accent-color,#38bdf8)] dark:border-zinc-700"><span class="mb-1.5 block h-4 rounded" style="background:linear-gradient(90deg,#0a0612 55%,#00e5ff 55%)"></span>Cyberpunk</button></div></section>
+    <section class="space-y-3"><h3 class="font-semibold">Colors</h3>
+      <label class="flex items-center justify-between gap-3">Accent<span cl
+ass="flex items-center gap-2"><code class="text-xs text-zinc-500"></code><input type="color" id="pAcc" class="h-8 w-12 cursor-pointer rounded border border-zinc-300 bg-transparent p-0.5 dark:border-zinc-700"></span></label>
+      <label class="flex items-center justify-between gap-3"><span id="pSurfL">Surface tone</span><span class="flex items-center gap-2"><code class="text-xs text-zinc-500"></code><input type="color" id="pSurf" class="h-8 w-12 cursor-pointer rounded border border-zinc-300 bg-transparent p-0.5 dark:border-zinc-700"></span></label>
+      <label class="flex items-center justify-between gap-3">Search highlight<span class="flex items-center gap-2"><code class="text-xs text-zinc-500"></code><input type="color" id="pHl" class="h-8 w-12 cursor-pointer rounded border border-zinc-300 bg-transparent p-0.5 dark:border-zinc-700"></span></label>
+      <div id="pWarn" class="space-y-1 text-xs"></div>
+    </section>
+    <section class="space-y-3"><h3 class="font-semibold">Typography &amp; layout</h3>
+      <label class="flex items-center justify-between gap-3">Font<select id="pFont" class="in !w-auto"><option value="dm">DM Sans (default)</option><option value="sys">System Sans</option><option value="serif">Serif</option><option value="mono">Monospace</option><option value="inter">Inter</option><option value="roboto">Roboto</option><option value="merri">Merriweather</option></select></label>
+      <label class="flex items-center justify-between gap-3">Corners<select id="pRad" class="in !w-auto"><option value="">Default</option><option value="sharp">Sharp · 0px</option><option value="rounded">Rounded · 6px</option><option value="pill">Pill · 16px</option></select></label>
+      <label class="flex items-center justify-between gap-3">Density<select id="pDen" class="in !w-auto"><option value="">Comfortable</option><option value="compact">Compact</option><option value="spacious">Spacious</option></select></label>
+    </section>
+    <section><label class="block"><span class="font-semibold">Text size</span><output id="pSc" class="float-right text-zinc-500"></output><input id="pScale" type="range" min="80" max="120" step="5" class="mt-2 w-full accent-[var(--accent-color,#38bdf8)]"></label></section>
+    <section class="space-y-2"><h3 class="font-semibold">Custom CSS <span class="font-normal text-zinc-500">· advanced</span></h3>
+      <textarea id="pCss" rows="7" spellcheck="false" maxlength="10000" class="in font-mono !text-xs" placeholder=".card { border-radius: 0; }"></textarea>
+      <p class="text-xs text-zinc-500">Applies as you type. Hooks: <code>.card</code> <code>#list</code> <code>[data-tab]</code> <code>mark</code>. <code>@import</code> and remote <code>url()</code> are removed.</p></section>
+    <section class="space-y-2"><h3 class="font-semibold">Cloud sync</h3>
+      <p id="cStat" class="text-xs text-zinc-500"></p>
+      <div id="cOff" class="space-y-2"><button class="hb w-full justify-center border border-zinc-300 dark:border-zinc-700" data-act="cNew">Turn on sync</button>
+        <div class="flex gap-2"><input id="cKey" class="in !py-1.5 font-mono !text-xs" placeholder="Existing sync key"><button class="hb border border-zinc-300 dark:border-zinc-700" data-act="cLink">Link</button></div></div>
+      <div id="cOn" class="hidden space-y-2"><code id="cShow" class="block break-all rounded-lg bg-zinc-100 p-2 text-xs dark:bg-zinc-800"></code>
+        <div class="flex gap-2"><button class="hb flex-1 justify-center border border-zinc-300 dark:border-zinc-700" data-act="cNow">Sync now</button><button class="hb flex-1 justify-center border border-zinc-300 dark:border-zinc-700" data-act="cCopy">Copy key</button><button class="hb flex-1 justify-center border border-zinc-300 dark:border-zinc-700" data-act="cOffBtn">Turn off</button></div>
+        <p class="text-xs text-zinc-500">Paste this key on another device (Link) to share your library. Anyone with the key can read it, so keep it private.</p></div>
+    </section>
+    <secti
+on class="space-y-2"><h3 class="font-semibold">Appearance code</h3>
+      <p class="text-xs text-zinc-500">Open tabs update live. To use this look on another device, copy the code here and apply it there.</p>
+      <textarea id="pCode" rows="2" spellcheck="false" class="in font-mono !text-xs" placeholder="Paste a sync code here"></textarea>
+      <div class="flex gap-2"><button class="hb flex-1 justify-center border border-zinc-300 dark:border-zinc-700" data-act="copyCode">Copy code</button><button class="hb flex-1 justify-center border border-zinc-300 dark:border-zinc-700" data-act="applyCode">Apply code</button></div></section>
+  </div>
+  <div class="border-t border-zinc-200 p-4 dark:border-zinc-800"><button class="hb flex-1 justify-center border border-zinc-300 dark:border-zinc-700 w-full" data-act="resetPrefs">Reset to default</button></div>
+</aside>
+<div id="toast" role="status" class="fixed bottom-5 left-1/2 z-50 hidden -translate-x-1/2 rounded-xl bg-zinc-900 px-4 py-2.5 text-sm text-zinc-50 shadow-xl dark:bg-zinc-100 dark:text-zinc-900"></div>
+
+<dialog id="dlg" class="m-auto w-[min(92vw,28rem)] rounded-2xl border border-zinc-200 bg-white p-0 text-zinc-900 shadow-2xl backdrop:bg-black/60 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
+  <form id="f" class="space-y-4 p-5">
+    <h2 class="brand text-lg font-bold">Add bookmark</h2>
+    <label class="block text-sm font-medium">Title<input id="fT" class="in mt-1 font-normal" placeholder="Page title (optional)"></label>
+    <label class="block text-sm font-medium">URL<input id="fU" required class="in mt-1 font-normal" placeholder="https://example.com"></label>
+    <label class="block text-sm font-medium">Category<select id="fC" class="in mt-1 font-normal"></select></label>
+    <label class="block text-sm font-medium">Tags<input id="fTags" class="in mt-1 font-normal" placeholder="machine-learning, trading"><span class="mt-1 block text-xs text-zinc-500">Comma-separated tags</span></label>
+    <label class="block text-sm font-medium">Folder<input id="fFolder" class="in mt-1 font-normal" placeholder="Tech/AI/Audio"></label>
+    <label class="block text-sm font-medium">Notes / Description<textarea id="fNotes" rows="2" class="in mt-1 font-normal" placeholder="Why did you bookmark this?"></textarea></label>
+    <div class="flex justify-end gap-2 pt-1">
+      <button type="button" class="hb" id="fX">Cancel</button>
+      <button class="rounded-lg bg-[var(--accent-color,#38bdf8)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90">Save bookmark</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="paletteDlg" class="m-auto w-[min(92vw,40rem)] rounded-2xl border border-zinc-200 bg-white p-0 text-zinc-900 shadow-2xl backdrop:bg-black/60 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"><div class="p-4"><h2 class="brand mb-3 text-lg font-bold">Command palette</h2><input id="paletteQ" class="in" placeholder="Search bookmarks…" autocomplete="off"><div id="paletteResults" class="mt-3 max-h-80 overflow-y-auto"></div><p class="mt-3 text-xs text-zinc-500">↑ ↓ to navigate · Enter to open · Esc to close</p></div></dialog>
+<dialog id="infoDlg" class="m-auto w-[min(92vw,48rem)] max-h-[85vh] overflow-y-auto rounded-2xl border border-zinc-200 bg-white p-0 text-zinc-900 shadow-2xl backdrop:bg-black/60 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"><div class="p-5"><div class="flex items-center justify-between"><h2 id="infoTitle" class="brand text-xl font-bold">Insights</h2><button class="hb" data-act="closeInfo" aria-label="Close">✕</button></div><div id="infoBody" class="mt-4"></div></div></dialog>
+
+
+<dialog id="faviconDlg" class="m-auto max-h-[92vh] w-[min(96vw,64rem)] overflow-y-auto rounded-2xl border border-zinc-200 bg-white p-0 text-zinc-900 shadow-2xl backdrop:bg-black/60 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
+  <div class="sticky top-0 z-10 flex items-center justify-between border-b border-zinc-200 bg-white/95 p-4 backdrop-blu
+r dark:border-zinc-800 dark:bg-zinc-900/95">
+    <div><h2 class="brand text-xl font-bold">✨ Favicon Studio</h2><p class="text-xs text-zinc-500">Create a custom tab icon and export production sizes.</p></div>
+    <div class="flex items-center gap-2"><button id="btn-export-all" class="rounded-lg bg-[var(--accent-color,#38bdf8)] px-3 py-2 text-xs font-semibold text-white">Export PNG Bundle</button><button class="hb" data-act="closeFavicon" aria-label="Close favicon studio">✕</button></div>
+  </div>
+  <div class="grid gap-4 p-4 md:grid-cols-2">
+    <section class="space-y-4">
+      <div class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+        <div class="mb-4 flex rounded-lg bg-zinc-100 p-1 dark:bg-zinc-950"><button id="tab-emoji" class="flex-1 rounded-md bg-[var(--accent-color,#38bdf8)] px-3 py-2 text-sm font-medium text-white">Emoji / Text</button><button id="tab-upload" class="flex-1 rounded-md px-3 py-2 text-sm text-zinc-500">Image Upload</button></div>
+        <div id="section-emoji" class="space-y-4">
+          <label class="block text-sm font-medium">Character / Emoji / Text<input id="inp-text" maxlength="4" class="in mt-1" value="🚀"></label>
+          <div class="grid grid-cols-2 gap-3"><label class="text-sm">Background color<input id="inp-bg-color" type="color" class="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-transparent dark:border-zinc-800" value="#3b82f6"><input id="inp-bg-color-hex" class="in mt-1 font-mono text-xs" value="#3b82f6" aria-label="Background color hex"></label><label class="text-sm">Text / icon color<input id="inp-text-color" type="color" class="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-transparent dark:border-zinc-800" value="#ffffff"><input id="inp-text-color-hex" class="in mt-1 font-mono text-xs" value="#ffffff" aria-label="Text color hex"></label></div>
+          <div class="grid grid-cols-2 gap-3"><label class="text-sm">Corner radius: <span id="lbl-radius">25</span>%<input id="inp-radius" type="range" min="0" max="50" value="25" class="w-full accent-[var(--accent-color,#38bdf8)]"></label><label class="text-sm">Font size: <span id="lbl-font-size">55</span><input id="inp-font-size" type="range" min="20" max="80" value="55" class="w-full accent-[var(--accent-color,#38bdf8)]"></label></div>
+        </div>
+        <div id="section-upload" class="hidden space-y-3">
+          <div id="drop-zone" class="cursor-pointer rounded-xl border-2 border-dashed border-zinc-300 p-7 text-center hover:border-[var(--accent-color,#38bdf8)] dark:border-zinc-700"><div class="text-3xl">🖼️</div><p class="mt-2 text-sm font-medium">Click or drag an image here</p><p class="mt-1 text-xs text-zinc-500">PNG, JPG, SVG or ICO · max 2 MB</p><input id="file-input" type="file" accept="image/png,image/jpeg,image/svg+xml,image/x-icon,.ico" class="hidden"></div>
+          <p class="text-xs text-zinc-500">Uploaded images are stored in this browser as a data URL.</p>
+        </div>
+      </div>
+      <div class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"><h3 class="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">Live canvas preview</h3><div class="checkerboard flex justify-center rounded-xl border border-zinc-200 p-6 dark:border-zinc-800"><canvas id="main-canvas" width="180" height="180" class="h-36 w-36 rounded-lg shadow-xl"></canvas></div><p class="mt-3 text-xs text-zinc-500">Changes apply immediately to the real browser tab icon and are saved in BookmarkHub.</p></div>
+    </section>
+    <section class="space-y-4">
+      <div class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"><h3 class="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">Browser tab previews</h3><div class="space-y-3">
+        <div class="rounded-xl border border-zinc-200 bg-zinc-100 p-3 dark:border-zinc-800 dark:bg-zinc-950"><p class="mb-2 text-xs text-zinc-500">Light browser</p><div class="flex items-center gap-2 rounded-t-lg bg-white p-3 text-sm text
+-zinc-800"><img class="preview-img h-4 w-4 object-contain" alt=""><span>BookmarkHub</span></div></div>
+        <div class="rounded-xl border border-zinc-800 bg-zinc-950 p-3"><p class="mb-2 text-xs text-zinc-500">Dark browser</p><div class="flex items-center gap-2 rounded-t-lg bg-zinc-800 p-3 text-sm text-zinc-100"><img class="preview-img h-4 w-4 object-contain" alt=""><span>BookmarkHub</span></div></div>
+        <div class="flex items-center gap-3 rounded-xl bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 p-4"><img class="preview-img h-14 w-14 rounded-2xl object-cover" alt=""><span class="text-sm text-white">Apple Touch Icon · 180×180</span></div>
+      </div></div>
+      <div class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"><h3 class="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500">Favicon link status</h3><p class="break-all font-mono text-xs text-[var(--accent-color,#38bdf8)]" id="code-data-uri">Waiting for render…</p><p class="mt-2 text-xs text-zinc-500">PNG data URLs are injected into <code>favicon-ico</code> and <code>favicon-apple</code>.</p></div>
+      <div class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800"><h3 class="mb-2 text-sm font-semibold">Accent presets</h3><div class="flex flex-wrap gap-2"><button data-fav-accent="sky" class="rounded-full bg-sky-500 px-3 py-1.5 text-xs font-medium text-white">Sky</button><button data-fav-accent="emerald" class="rounded-full bg-emerald-500 px-3 py-1.5 text-xs font-medium text-white">Emerald</button><button data-fav-accent="violet" class="rounded-full bg-violet-500 px-3 py-1.5 text-xs font-medium text-white">Violet</button><button data-fav-accent="rose" class="rounded-full bg-rose-500 px-3 py-1.5 text-xs font-medium text-white">Rose</button><button data-fav-accent="amber" class="rounded-full bg-amber-500 px-3 py-1.5 text-xs font-medium text-zinc-900">Amber</button></div></div>
+    </section>
+  </div>
+</dialog>
+
+<script id="seed" type="text/plain" data-dupes="354"><DT><A HREF="https://www.youtube.com/watch?v=9WIsvEswZTk" ADD_DATE="1773272929">5 AI Engineer Projects to Build in 2026 | Ex-Google, Microsoft - YouTube</A>
+<DT><A HREF="https://www.kaggle.com/datasets/kienngx/nemotron-30b-competition-trainingdata-cot-labels" ADD_DATE="1774638967">Nemotron-30B competition trainingdata (CoT+labels)</A>
+<DT><A HREF="https://keras.io/examples/vision/patch_convnet/#:~:text=The%20interaction%20between%20the%20CLASS,image%20for%20the%20classification%20decision." ADD_DATE="1775155575">Augmenting convnets with aggregated attention</A>
+<DT><A HREF="https://huggingface.co/TalhaAhmed/Urdu_kaani_TTS" ADD_DATE="1776370685">TalhaAhmed/Urdu_kaani_TTS · Hugging Face</A>
+<DT><A HREF="https://github.com/asghar-rizvi/-Urdu-Text-to-Speech-with-Voice-Cloning" ADD_DATE="1776370696">asghar-rizvi/-Urdu-Text-to-Speech-with-Voice-Cloning: A fine-tuned SpeechT5 Urdu TTS model with voice cloning that converts both Urdu and Roman Urdu text into natural speech. Trained on diverse Urdu and Zia Mohiuddin recordings, it offers expressive, speaker-specific synthesis with a FastAPI demo for easy testing.</A>
+<DT><A HREF="https://www.linkedin.com/posts/muhammad-hamza-32622520b_ai-ml-speecht5-activity-7223312589160648705-qt9x/" ADD_DATE="1776370959">(8) Post | LinkedIn</A>
+<DT><A HREF="https://www.makesense.ai/" ADD_DATE="1776675486">Make Sense</A>
+<DT><A HREF="https://medium.com/@nazari-ehsan/understanding-dense-object-detection-1bafd13c1bb5" ADD_DATE="1777647249">Understanding Dense Object Detection | by Ehsan Nazari | Medium</A>
+<DT><A HREF="https://huggingface.co/segmind/tiny-sd" ADD_DATE="1777836588">segmind/tiny-sd · ImageGenerator</A>
+<DT><A HREF="https://www.kaggle.com/datasets/ramizsaud/urdu-audio-transcriptions-dataset" ADD_DATE="1777897977">Urdu Audio Transcriptions Dataset</A>
+<DT><A HREF="https://www.theblock.co/post/380746/bitmine-buys-44-million-ethereum" ADD_DATE="1778150766">BitMine buys $44 million worth of Ethereum as Tom Lee gives 
+bullish outlook | The Block</A>
+<DT><A HREF="https://www.investopedia.com/terms/p/prediction-market.asp" ADD_DATE="1778260261">Prediction Markets Explained: Types, Uses, and Real-World Examples</A>
+<DT><A HREF="https://github.com/mumu-k/LLightSegNet" ADD_DATE="1777313964">mumu-k/LLightSegNet: An end-to-end low-light segmentation network composed of MobileViT, the SIN activation curve function, and the SGE module.</A>
+<DT><A HREF="https://www.sciencedirect.com/science/article/abs/pii/S0952197625035973" ADD_DATE="1777314112">Low-light image segmentation using sine-curve enhancement and cross-resolution attention mechanism - ScienceDirect</A>
+<DT><A HREF="https://www.sciencedirect.com/science/article/abs/pii/S0952197623014768" ADD_DATE="1777314386">Memory-efficient transformer network with feature fusion for breast tumor segmentation and classification task - ScienceDirect</A>
+<DT><A HREF="https://github.com/ahmedeqbal/MET-Net/blob/main/MET-Net_implementation.ipynb" ADD_DATE="1777314940">MET-Net/MET-Net_implementation.ipynb at main · ahmedeqbal/MET-Net</A>
+<DT><A HREF="https://nansen.ai/" ADD_DATE="1780757366">Nansen AI - Trade Everything Onchain with AI</A>
+<DT><A HREF="https://glassnode.com/" ADD_DATE="1780757405">Glassnode - Digital Asset Market Intelligence</A>
+<DT><A HREF="https://github.com/fbdesignpro/sweetviz" ADD_DATE="1781113375">fbdesignpro/sweetviz: Visualize and compare datasets, target values and associations, with one line of code.</A>
+<DT><A HREF="https://worldcuphighlights.online/mexico-vs-south-africa-full-match-replay-highlights/" ADD_DATE="1781265933">Mexico vs South Africa Full Match Replay highlights - World Cup Highlights</A>
+<DT><A HREF="https://worldcuphighlights.online/netherlands-vs-japan-full-match-replay-and-highlights/" ADD_DATE="1781545789">Netherlands vs Japan Full Match Replay and Highlights - World Cup Highlights</A>
+<DT><A HREF="https://app.kryll.io/dashboard" ADD_DATE="1781660151">Kryll³ | All-in-One Web3 Dashboard – Track, Analyze, Govern</A>
+<DT><A HREF="https://public.com/invest/stocks" ADD_DATE="1781717480">Invest in Stocks - Public.com</A>
+<DT><A HREF="https://www.youtube.com/watch?v=HIBozcOlQPY" ADD_DATE="1781721464">(84) How I’m Preparing For The “Supercycle” - YouTube</A>
+<DT><A HREF="https://www.google.com/search?q=gmktec+evo-x2&oq=gmktec+&gs_lcrp=EgZjaHJvbWUqDAgCEAAYQxiABBiKBTIGCAAQRRg5MgwIARAAGEMYgAQYigUyDAgCEAAYQxiABBiKBTIMCAMQABhDGIAEGIoFMgcIBBAAGIAEMgcIBRAAGIAEMgcIBhAAGIAEMgcIBxAAGIAEMgwICBAAGEMYgAQYigUyBwgJEAAYgATSAQg2MDQ3ajBqN6gCCLACAfEFWw04fO4ado0&sourceid=chrome&ie=UTF-8" ADD_DATE="1782039921">gmktec evo-x2 - Google Search</A>
+<DT><A HREF="https://www.youtube.com/shorts/ww9j6l46J7I" ADD_DATE="1782047400">(24) This Liquidity Trading Concept Is Actually Genius - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=xTTDH5iRhJc" ADD_DATE="1782826844">This Simple Scalping Strategy Makes Me Over $10,000/Month - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=SP5AtDBwrQk" ADD_DATE="1782838199">(10) How I Catch Exact Tops &amp; Bottoms Using Standard Deviations - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=cUTsoU-15Tc" ADD_DATE="1783053575">(1) The Simplest Orderflow Trading Model - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=e_RlG84pq6g" ADD_DATE="1783072033">(3) The Only Trading STRATEGY you&#39;ll EVER need - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=Bl0CQnhSbgo" ADD_DATE="1783091348">(11) Trading Isn&#39;t Hard, It&#39;s Misunderstood (Full Course) - YouTube</A>
+<DT><A HREF="https://www.kaggle.com/code/osamaaslam86004/emotion-recognition?scriptVersionId=320150360" ADD_DATE="1783601300">Emotion Recognition</A>
+<DT><A HREF="https://www.tradingview.com/chart/9fQMbPKD/?symbol=BINANCE%3ABTCUSDT.P" ADD_DATE="1783601300">BTCUSDT.P 62,544.9 ▲ +0.47% BTC</A>
+<DT><A HREF="https://www.google.com/search?q=how+to+calculate+volatility+percentile&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIICAEQABgHGB4yDQgCEAAYhgMYgAQYigUyBwgDEAAY7wUyBwgEEAAY7
+wUyBwgFEAAY7wUyBwgGEAAY7wUyBwgHEAAY7wXSAQkyMDkzNWowajeoAgiwAgHxBQG2VcdsGggs8QUBtlXHbBoILA&sourceid=chrome&ie=UTF-8&udm=50&fbs=ABfTbFVyMZGZf1hfvX9uKjN_-G8cY2oODYyTyZk24Xz37_7FQ6NVv6xh17vQ5j3mFWMF5-wiMcj71_PDlJTBGubUtsVjntDZBrTCp6H5x0Us4Z0xBITuVwnwn528toeHAm8GyP2KtFZ8EDY6G5DfWsGIOULbFDDrjLMLe_axqoaptLpKD9E8fv_Z50pbazE5n4c1i8Lya_vO&aep=10&ntc=1&mstk=AUtExfCY4_b3VC09MLlsL8ly0GpKIjAOiAmL8-2k7oLLyC2-XElbJrtWeu63WlzTzqsMZ5SbBViVblqcu_mQAb1UyGiairbjPY7VAIuyFHVo8rWZilk6ZErpv0eGrKg8FNCvb1B8h9MCqSyWaPuZODXjCPuLgNUQ1JTLdn6y8dhnTmZFJtIbRHNTsCJN6yzIuB_JpqghrpMAeJ-ZPp1PrSZdvpt2xzCocfyztpxSleIJybQvF6XryQyxBQmwVG41vkTbrBtS24yUb5GpVBWALy-itVhuBg-PuM-HPxncRH3S65WR1sBlNCLswRDOlIgJ0pReRj6dou2tWQ-x8w&aioh=3&csuir=1&mtid=yHNPao6EGNfx7M8PncuOqAE" ADD_DATE="1783601300">how to calculate volatility percentile - Google Search</A>
+<DT><A HREF="https://www.youtube.com/watch?v=XFtayhPIdEs" ADD_DATE="1783685652">The “ONE CANDLE&quot; Scalping Strategy I Will Use For Life - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=qLtq73bTPBA" ADD_DATE="1783702715">Breaking Down My SIMPLE Trading Strategy (step by step) - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=OjZ8djwrm4I" ADD_DATE="1783761422">You&#39;re Drawing Trendlines WRONG (Easy Fix) - YouTube</A>
+<DT><A HREF="https://www.tapmad.com/sports/fifa-world-cup-2026/444/1" ADD_DATE="1783787173">Watch FIFA World Cup 2026 Live Matches &amp; Highlights on tapmad</A>
+<DT><A HREF="https://www.youtube.com/watch?v=pasWNYvY4TA" ADD_DATE="1783858712">Stop Losses DON’T Work (Use This Instead) - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=cTecm-uk8FA" ADD_DATE="1783882057">Everyone is trading Crude Oil, here’s why: - YouTube</A>
+<DT><A HREF="https://github.com/HKUDS/Vibe-Trading" ADD_DATE="1784029679">HKUDS/Vibe-Trading: &quot;Vibe-Trading: Your Personal Trading Agent&quot;</A>
+<DT><A HREF="https://editframe.com/cloud" ADD_DATE="1784578231">Cloud Rendering — Editframe</A>
+<DT><A HREF="https://www.youtube.com/watch?v=48N69IbGN-M" ADD_DATE="1784797690">At 76, Arsène Wenger Reveals the 5 Football Players He Admired the Most - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=brbN5lmCIpY" ADD_DATE="1784863054">(21) 15 Intensely GRAPHIC TV Shows You Can’t Look Away From! - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=STH929HARLo" ADD_DATE="1785175650">(26) 9 Free AI Skills That Feel Like Cheat Codes - YouTube</A>
+<DT><A HREF="https://github.com/amazon-science/esci-data" ADD_DATE="1785412796">amazon-science/esci-data: Shopping Queries Dataset: A Large-Scale ESCI Benchmark for Improving Product Search</A>
+<DT><A HREF="https://pmybals.pmyp.gov.pk/pmyphome/Index" ADD_DATE="1786560132">Digital Youth Hub - DYH</A>
+<DT><A HREF="https://pmyp.gov.pk/" ADD_DATE="1786560143">Digital Youth Hub</A>
+<DT><A HREF="https://actai.aiskillbridge.pk/upcoming" ADD_DATE="1786590204">ACT-AI Student Registration</A>
+<DT><A HREF="https://www.zeroclawlabs.ai/skills" ADD_DATE="1786791625">Skills Hub | ZeroClaw</A>
+<DT><A HREF="https://clawhub.ai/steipete/skills/summarize" ADD_DATE="1786794984">summarize — ClawHub</A>
+<DT><A HREF="https://total-sportek.st/" ADD_DATE="1786897168">TOTALSPORTEK - FIFA WORLD CUP LIVE</A>
+<DT><A HREF="https://www.evidentlyai.com/" ADD_DATE="1786900882">Evidently AI - Open-source AI Evaluation and Observability</A>
+<DT><A HREF="https://github.com/confident-ai/deepeval" ADD_DATE="1786902365">confident-ai/deepeval: The LLM Evaluation Framework</A>
+<DT><A HREF="https://arxiv.org/html/2602.15189v1" ADD_DATE="1787274851">ScrapeGraphAI-100k: A Large-Scale Dataset for LLM-Based Web Information Extraction</A>
+<DT><A HREF="https://langwatch.ai/docs/use-cases/ai-coach" ADD_DATE="1787307688">Evaluating an AI Coach with LLM-as-a-Judge - LangWatch</A>
+<DT><A HREF="https://www.youtube.com/watch?v=078kiJV6w_M" ADD_DATE="1787330614">(1) How to Obtain a Proof of Life Certificate for Pensioners Through PakID Mobile App - YouTube</A>
+<DT><A HREF="https://en.m.wikipedia.org/wiki/FastC
+GI" ADD_DATE="1709301429">FastCGI - Wikipedia</A>
+<DT><A HREF="https://www.linkedin.com/pulse/which-generative-ai-best-chatgpt-vs-gemini-pi-claude-2-alena-gorb-z6nhe#:~:text=By%20and%20large%2C%20I%20would,data%20analysis%20and%20summaries%2C%20etc." ADD_DATE="1710304782">Which Generative AI Is the Best? ChatGPT vs. Gemini vs. Pi vs. Claude 2</A>
+<DT><A HREF="https://www.amazon.com/dp/B0C9J69KH8/?_encoding=UTF8&pd_rd_i=B0BQHBWPYX&ref_=sbx_be_s_sparkle_ssd_tt&pd_rd_w=79zhv&content-id=amzn1.sym.ef1e4b2f-0602-4f41-8ed7-a40e7082137f&pf_rd_p=ef1e4b2f-0602-4f41-8ed7-a40e7082137f&pf_rd_r=ZDE8R3GC5AN46FBC8NWY&pd_rd_wg=pvZmD&pd_rd_r=0846b1d8-9b82-490b-b590-f1744ca7c606&th=1&psc=1" ADD_DATE="1769455962">Amazon.com: ACEMAGICIAN Kron Mini K1 Mini PC, Ryzen 7 7730U, 32GB DDR4 512GB SSD Mini Computers (8C/16T, up to 4.5Ghz),4K Triple Display Desktop WiFi6/Bluetooth, Compact Silent PC for Light Gaming, Office, Design : Electronics</A>
+<DT><A HREF="https://www.techpowerup.com/gpu-specs/radeon-rx-9060-xt-16-gb.c4293" ADD_DATE="1769502728">AMD Radeon RX 9060 XT 16 GB Specs | TechPowerUp GPU Database</A>
+<DT><A HREF="https://www.forbes.com/sites/johnwerner/2026/01/25/mit-technology-review-details-big-tech-trends-for-2026/" ADD_DATE="1769503713">MIT Technology Review Details Big Tech Trends For 2026</A>
+<DT><A HREF="https://m.youtube.com/watch?v=nVnxG10D5W0&pp=ugUHEgVlbi1VU9IHCQmRCgGHKiGM7w%3D%3D" ADD_DATE="1770624480">9 AI Concepts Explained in 7 minutes: AI Agents, RAGs, Tokenization, RLHF, Diffusion, LoRA... - YouTube</A>
+<DT><A HREF="https://m.youtube.com/watch?v=yhOltG5QqEw" ADD_DATE="1770658695">Moltbot / Clawdbot Full Guide: From Overview to Installation - YouTube</A>
+<DT><A HREF="https://lykos.ai/" ADD_DATE="1770661206">Lykos AI</A>
+<DT><A HREF="https://pinokio.co/" ADD_DATE="1770661510">Pinokio</A>
+<DT><A HREF="https://m.youtube.com/watch?v=9P51zq_Up8g" ADD_DATE="1770729142">How to Develop AutoML Application using PyCaret with Streamlit in Python in Urdu &amp; Hindi - YouTube</A>
+<DT><A HREF="https://www.visualcapitalist.com/ranked-worlds-top-copper-producers-2000-2024/" ADD_DATE="1770742668">Ranked: The World’s Top Copper Producers (2000 vs. 2024)</A>
+<DT><A HREF="https://m.youtube.com/watch?v=xj44QBy6LuY" ADD_DATE="1770743612">AI Agents can now Build System Design Diagrams on Eraser 🤯 - YouTube</A>
+<DT><A HREF="https://venturebeat.com/orchestration/mits-new-fine-tuning-method-lets-llms-learn-new-skills-without-losing-old" ADD_DATE="1770996926">MIT&#39;s new fine-tuning method lets LLMs learn new skills without losing old ones | VentureBeat</A>
+<DT><A HREF="https://huggingface.co/papers/2602.08847" ADD_DATE="1771017908">Paper page - Dr. MAS: Stable Reinforcement Learning for Multi-Agent LLM Systems</A>
+<DT><A HREF="https://huggingface.co/papers/2602.11089" ADD_DATE="1771054388">Paper page - DataChef: Cooking Up Optimal Data Recipes for LLM Adaptation via Reinforcement Learning</A>
+<DT><A HREF="https://venturebeat.com/data/observational-memory-cuts-ai-agent-costs-10x-and-outscores-rag-on-long" ADD_DATE="1771054479">&#39;Observational memory&#39; cuts AI agent costs 10x and outscores RAG on long-context benchmarks | VentureBeat</A>
+<DT><A HREF="https://github.com/aiming-lab/SkillRL" ADD_DATE="1771268028">GitHub - aiming-lab/SkillRL: SkillRL: Evolving Agents via Recursive Skill-Augmented Reinforcement Learning</A>
+<DT><A HREF="https://news.mit.edu/2026/new-technique-makes-ai-models-leaner-faster-while-still-learning-0409" ADD_DATE="1775766820">New technique makes AI models leaner and faster while they’re still learning | MIT News | Massachusetts Institute of Technology</A>
+<DT><A HREF="https://www.reddit.com/r/koii/comments/1c8kxnm/how_to_add_a_token_to_the_main_key/" ADD_DATE="1713601631">how to add a token to the main key? : r/koii</A>
+<DT><A HREF="https://www.reddit.com/r/airdrops/comments/1aszbvs/koii_network_join_an_ai_revolution_project_earn/" ADD_DATE="1713601968">Koii Network — Join an AI Revolution Project &amp; Earn Pass
+ive Income by Turnning Your Node : r/airdrops</A>
+<DT><A HREF="https://www.reddit.com/r/MetaverseHub/comments/1c6xvqh/come_check_out_koii_network/" ADD_DATE="1713602413">Come check out KOII Network! 🤩 : r/MetaverseHub</A>
+<DT><A HREF="https://www.reddit.com/r/MetaverseHub/comments/1c8l544/how_to_add_a_token_to_the_main_key/" ADD_DATE="1713602510">how to add a token to the main key? : r/MetaverseHub</A>
+<DT><A HREF="https://www.reddit.com/r/TokenWallStreet/comments/1c6yey8/join_the_koii_network_become_a_task_operator_and/" ADD_DATE="1713602613">Join the Koii Network💻 Become a Task Operator and Earn Crypto Rewards!🤑 : r/TokenWallStreet</A>
+<DT><A HREF="https://www.reddit.com/r/TokenScout/comments/1c7rru9/join_koii_network_work_as_a_task_operator_and/" ADD_DATE="1713602654">Join Koii Network💻 Work as a Task Operator and Earn Crypto Money!🤑 : r/TokenScout</A>
+<DT><A HREF="https://www.reddit.com/r/Metaverse_Blockchain/comments/1c60p4r/koii_network_is_the_place_to_be/" ADD_DATE="1713602700">KOII Network is the place to be 🤑 : r/Metaverse_Blockchain</A>
+<DT><A HREF="https://www.reddit.com/r/NervosNetwork/comments/tv6ye2/koi_discussion/" ADD_DATE="1713602825">koi discussion : r/NervosNetwork</A>
+<DT><A HREF="https://www.reddit.com/r/CryptoBlades/comments/1c7ragj/start_using_koii_node_operators_for/" ADD_DATE="1713602905">Start using KOII Node Operators for Decentralization 💻 : r/CryptoBlades</A>
+<DT><A HREF="https://www.reddit.com/r/ICOcryptos/comments/1c6y59g/task_operators_are_really_important_for_koii/" ADD_DATE="1713602947">Task Operators are really important for KOII Network 🌌 : r/ICOcryptos</A>
+<DT><A HREF="https://www.geckoterminal.com/eth/pools/0x972322f6274838798f0fae8de9e33823c1ad528e" ADD_DATE="1713606907">Koii $0.0₇5836 - Koii Network Price on Uniswap V2 | GeckoTerminal</A>
+<DT><A HREF="https://www.facebook.com/koiinet" ADD_DATE="1713625292">(20+) Facebook</A>
+<DT><A HREF="https://www.facebook.com/koii.network" ADD_DATE="1713625393">(20+) Facebook</A>
+<DT><A HREF="https://www.facebook.com/profile.php?id=61555927733522" ADD_DATE="1713625404">Facebook</A>
+<DT><A HREF="https://www.nodle.com/nodle-app" ADD_DATE="1713776851">nodle-app-website</A>
+<DT><A HREF="https://dailycoin.com/decentralized-data-storage-networks-top-alternatives-to-consider/" ADD_DATE="1713777158">Top 6 Decentralized Storage Platforms for Storing Data on the Blockchain - DailyCoin</A>
+<DT><A HREF="https://www.youtube.com/watch?v=rz3-UnNRLD4" ADD_DATE="1713808943">How To Mine Gala - Easily Mine Gala On Any Computer or Laptop | GALA - YouTube</A>
+<DT><A HREF="https://unmineable.com/address/0x07BB7552e79A0cADCf4Bb56f6e48A50aa36Fb167?coin=GALA&tab=workers" ADD_DATE="1713812770">unMineable - Gala (GALA) mining pool - Earn GALA with your Graphics Cards, CPU &amp; ASICs</A>
+<DT><A HREF="https://www.youtube.com/watch?v=f8f6ZHCPVpw" ADD_DATE="1713915911">I Copper Modded An RTX 3070 Ti. Memory Temperature Dropped 45 Degrees! This Is How. (110C to 64C) - YouTube</A>
+<DT><A HREF="https://woolypooly.com/en/best-gpu-for-mining" ADD_DATE="1713948910">Best GPU Mining Ranking 2023 &amp; 2024, Benchmarked and Sorted by ROI</A>
+<DT><A HREF="https://woolypooly.com/en/coin/rtm" ADD_DATE="1713949208">Raptoreum Mining Pool. Mine RTM with Low Fees</A>
+<DT><A HREF="https://minerstat.com/coin/NEX/profitability" ADD_DATE="1713952570">NEX profitability - NexaPoW ⛏️ | minerstat</A>
+<DT><A HREF="https://whattomine.com/coins/407-aitt-kawpow?hr=30.0&p=75.0&fee=0.0&cost=0.1&cost_currency=USD&hcost=0.0&span_br=&span_d=24&commit=Calculate" ADD_DATE="1713982695">Aittcoin (AITT) Mining Profit Calculator - WhatToMine</A>
+<DT><A HREF="https://xmrig.com/docs/miner/config/cpu" ADD_DATE="1713983736">CPU - XMRig</A>
+<DT><A HREF="https://minerstat.com/coins" ADD_DATE="1713986836">Coins to mine | minerstat</A>
+<DT><A HREF="https://www.assemblyai.com/" ADD_DATE="1734685617">AssemblyAI | AI models to transcribe and understand speech</A>
+<DT><A HREF="https://picsum.photos/" 
+ADD_DATE="1734686300">Lorem Picsum</A>
+<DT><A HREF="https://world.openfoodfacts.org/data" ADD_DATE="1734687552">https://world.openfoodfacts.org/data</A>
+<DT><A HREF="https://wit.ai/docs/quickstart" ADD_DATE="1734687967">Wit.ai</A>
+<DT><A HREF="https://jsonplaceholder.typicode.com/" ADD_DATE="1734688336">JSONPlaceholder - Free Fake REST API</A>
+<DT><A HREF="https://www.edenai.co/pricing" ADD_DATE="1734688770">Pricing | Eden AI</A>
+<DT><A HREF="https://vercel.com/guides/deploying-pusher-channels-with-vercel" ADD_DATE="1709235204">Deploying Real-Time Apps with Pusher Channels and Vercel</A>
+<DT><A HREF="https://blog.fanout.io/2020/09/21/vercel-and-websockets/" ADD_DATE="1709235915">Fanout | Blog » Vercel and WebSockets</A>
+<DT><A HREF="https://www.pythonanywhere.com/forums/topic/27785/" ADD_DATE="1709236035">How to post data to your own api? : Forums : PythonAnywhere</A>
+<DT><A HREF="https://www.pythonanywhere.com/forums/topic/27869/" ADD_DATE="1709237071">make a request to a view from another view. : Forums : PythonAnywhere</A>
+<DT><A HREF="https://stackoverflow.com/questions/70622614/why-scraping-a-website-using-pythonanywhere-gives-requests-exceptions-proxyerror" ADD_DATE="1709237985">python - Why Scraping a website using PythonAnywhere gives requests.exceptions.ProxyError? - Stack Overflow</A>
+<DT><A HREF="https://www.pythonanywhere.com/forums/topic/33786/" ADD_DATE="1709238335">Accessing my app from another site : Forums : PythonAnywhere</A>
+<DT><A HREF="https://www.pythonanywhere.com/forums/topic/13474/" ADD_DATE="1709238639">Does pythonanywhere.com allow server to server communication? : Forums : PythonAnywhere</A>
+<DT><A HREF="https://www.pythonanywhere.com/forums/topic/13556/" ADD_DATE="1709239226">Using external API in the application : Forums : PythonAnywhere</A>
+<DT><A HREF="https://www.google.com/search?q=how+send+request+from+one+pythonanywhere+to+another&oq=how+send+request+from+one+pyrhonanywhere&aqs=chrome.1.69i57j33l3.23684j0j7&client=ms-android-samsung&sourceid=chrome-mobile&ie=UTF-8#ip=1" ADD_DATE="1709240233">how send request from one pythonanywhere to another - Google Search</A>
+<DT><A HREF="https://help.pythonanywhere.com/pages/TwilioBehindTheProxy/" ADD_DATE="1709293692">How to get Twilio to work on Free accounts with the proxy (fixing requests ConnectonError in HTTPSConnectionPool) | PythonAnywhere help</A>
+<DT><A HREF="https://stackoverflow.com/questions/57221384/how-can-i-execute-a-heavy-processing-background-python-code-after-submitting-a" ADD_DATE="1709296783">How can I execute a heavy-processing, background python code after submitting a form in a Django website? - Stack Overflow</A>
+<DT><A HREF="https://stackoverflow.com/questions/32597390/open-url-from-pythonanywhere" ADD_DATE="1709298226">python - open url from pythonanywhere - Stack Overflow</A>
+<DT><A HREF="https://www.newsbtc.com/news/top-crypto-assets-q1-2025-grayscale-best-altcoins/" ADD_DATE="1735828690">Top Crypto Assets For Q1 2025: Grayscale Reveals Best Altcoins</A>
+<DT><A HREF="https://cryptorank.io/drophunting/plume-network-activity529" ADD_DATE="1735903038">Plume Network Airdrop guide: Steps to potential Reward | CryptoRank.io</A>
+<DT><A HREF="https://www.amazon.com/KAMRUI-i7-13620H-Computers-Computer-Business/dp/B0FXWDD1ND/?tag=kotaku01-20" ADD_DATE="1769456349">Amazon.com: KAMRUI Hyper H2 Mini Gaming PC, in-tel Core i5-14450HX Mini Computers (10C/16T, 4.8GHz), 32GB RAM 1TB PCle4.0 SSD Micro Desktop PC, Triple 4K Display, USB Type-C, WiFi6, BT5.2, Business Office Home : Electronics</A>
+<DT><A HREF="https://m.youtube.com/watch?v=deD0BXhQ-hc" ADD_DATE="1770546374">“Liquidity Is Peaking — This Will Hurt Markets” | Michael Howell on Bitcoin, Gold &amp; Fed Policy - YouTube</A>
+<DT><A HREF="https://m.youtube.com/watch?v=F5lYsf9fI2o" ADD_DATE="1770635898">I am bullish on these 5 tokens with Reason? - YouTube</A>
+<DT><A HREF="https://m.youtube.com/watch?v=1Y3LKHPaPsc" ADD_DATE="1770638465">Crypto currency is the future! Etherium is k
+ing! Inspired analyst explains all! - YouTube</A>
+<DT><A HREF="https://m.youtube.com/watch?v=7XTc2dC6Q00&pp=ugUEEgJlbg%3D%3D" ADD_DATE="1770641300">Banks Are Pushing Bitcoin Into the Death Spiral - YouTube</A>
+<DT><A HREF="https://www.google.com/search?q=Build+a+Small+Language+Model+%28SLM%29+From+Using+TensorFlow%2FKeras&sca_esv=507a868014978926&sxsrf=ANbL-n7cYozpboysVJ5hYwbM5GBTXHKK0w%3A1772480941965&ei=remladrUOr3qkdUP8O3egAE&biw=800&bih=473&ved=0ahUKEwia36qH_oGTAxU9daQEHfC2FxAQ4dUDCBE&uact=5&oq=Build+a+Small+Language+Model+%28SLM%29+From+Using+TensorFlow%2FKeras&gs_lp=Egxnd3Mtd2l6LXNlcnAiPkJ1aWxkIGEgU21hbGwgTGFuZ3VhZ2UgTW9kZWwgKFNMTSkgRnJvbSBVc2luZyBUZW5zb3JGbG93L0tlcmFzMgcQIRgKGKABSNykAlAAWK6UAnABeAGQAQCYAaIFoAGHMaoBCDItMjEuNS0yuAEDyAEA-AEBmAISoAKtJMICBBAjGCfCAgsQABiABBiKBRiGA8ICCBAAGIAEGKIEwgIFECEYoAHCAgQQIRgVwgIGEAAYFhgemAMAkgcKMS4wLjE2LjUtMaAHmEuyBwgyLTE2LjUtMbgHoCTCBwYyLTEyLjbIB4EBgAgB&sclient=gws-wiz-serp" ADD_DATE="1772481874">Build a Small Language Model (SLM) From Using TensorFlow/Keras - Google Search</A>
+<DT><A HREF="https://www.youtube.com/watch?v=pOFcwcwtv3k" ADD_DATE="1772483045">(3) Build a Small Language Model (SLM) From Scratch - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=ZtN6Gg_bdJE" ADD_DATE="1772490437">(4) OpenClaw RL from Scratch - Align your personal assistant to your preferences by simply chatting - YouTube</A>
+<DT><A HREF="https://fractionai.xyz/waitlist/" ADD_DATE="1735077348">Fraction AI</A>
+<DT><A HREF="https://saharalabs.ai/" ADD_DATE="1735077363">Sahara AI: The Decentralized AI Blockchain Platform for a Collaborative Economy</A>
+<DT><A HREF="https://supertools.therundown.ai/content/llama-coder-ai-code-generator" ADD_DATE="1735079783">Llama Coder: Generate React Apps with Ease</A>
+<DT><A HREF="https://websim.ai/p/yoxmttafmv4h97g597ax/1" ADD_DATE="1735081252">websim.ai</A>
+<DT><A HREF="https://www.youtube.com/watch?v=CqOKjDGuyG0" ADD_DATE="1735082339">(80) 8 AI Websites you won&#39;t believe that are FREE - YouTube</A>
+<DT><A HREF="https://10015.io/tools/svg-blob-generator" ADD_DATE="1735131625">SVG Blob Generator Online | 10015 Tools</A>
+<DT><A HREF="https://whataicandotoday.com/" ADD_DATE="1735147256">What AI Can Do Today</A>
+<DT><A HREF="https://app.chaingpt.org/" ADD_DATE="1735148886">AI-Powered Web3 Tools for Blockchain Innovators | ChainGPT</A>
+<DT><A HREF="https://www.youtube.com/watch?v=fo0aYLSrcz8" ADD_DATE="1735149221">https://www.youtube.com/watch?v=fo0aYLSrcz8</A>
+<DT><A HREF="https://admin.evolup.com/v3/login" ADD_DATE="1735151084">Administration Area Evolup - Login</A>
+<DT><A HREF="https://arcane.engineer/pricing" ADD_DATE="1735151780">Arcane Engine Platform - Pricing</A>
+<DT><A HREF="https://lightgbm.readthedocs.io/en/stable/" ADD_DATE="1735152688">Welcome to LightGBM’s documentation! — LightGBM 4.5.0 documentation</A>
+<DT><A HREF="https://consensus.app/results/?q=Lightweight+machine+learning+models+for+cryptocurrency+prediction" ADD_DATE="1735154001">Lightweight machine learning models for cryptocurrency prediction - Consensus</A>
+<DT><A HREF="https://whataicandotoday.com/search" ADD_DATE="1735154009">Use AI for Search</A>
+<DT><A HREF="https://bookipi.com/pricing/" ADD_DATE="1735154179">Pricing | Bookipi</A>
+<DT><A HREF="https://huggingface.co/spaces/jbilcke-hf/ai-comic-factory" ADD_DATE="1735154414">AI Comic Factory - a Hugging Face Space by jbilcke-hf</A>
+<DT><A HREF="https://huggingface.co/docs/transformers/en/model_doc/jukebox" ADD_DATE="1735154527">Jukebox</A>
+<DT><A HREF="https://huggingface.co/docs/transformers/en/model_doc/time_series_transformer" ADD_DATE="1735154837">Time Series Transformer</A>
+<DT><A HREF="https://www.fluxcharts.com/articles/Trading-Concepts/Price-Action/Break-of-Structures" ADD_DATE="1735162760">Break of Structure (BOS) Explained</A>
+<DT><A HREF="https://suno.com/" ADD_DATE="1735212022">Suno</A>
+<DT><A HREF="https://my.10web.io/setup-onboarding/v2-ai-website-building" ADD_DATE="1735381958">Start AI website building - Dashboard</A>
+<D
+T><A HREF="https://www.gurufocus.com/news/9086321/crcl-maintained-by-td-cowen-price-target-raised-to-9200" ADD_DATE="1789684436">CRCL Maintained by TD Cowen -- Price Target Raised to $92.00</A>
+<DT><A HREF="https://gitingest.com/" ADD_DATE="1790025160">Git_repo_to_markdown</A>
+<DT><A HREF="https://www.youtube.com/watch?v=PV7sgd5Ijio" ADD_DATE="1791052426">I Added a Supervisor Agent, Guardrails &amp; Human Approval to My Multi-Agent AI System | Part 3 - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=ctHby5vhDqg&list=PLEQRwDHq07hk" ADD_DATE="1791053003">Build a Real-World Multi-Agent AI System using LangGraph | Multi-Agent AI + Memory + APIs - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=59GB3tW2Kns" ADD_DATE="1791060854">How to Add Memory in LangGraph AI Agents | Full Tutorial - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=Yt5xBk7Xbs0" ADD_DATE="1791060948">I Replaced APIs with MCP in My Multi-Agent AI Travel Planner | LangGraph | Part 2 - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=2zdWI2SYB9I" ADD_DATE="1791064645">AI Agentic Memory System Design - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=JcqF-XLT3wc" ADD_DATE="1791102590">Loop Engineering Explained: Why Better Models Won&#39;t Fix Your AI Agent - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=cSUvh72HnfI" ADD_DATE="1791103606">Complete GuideTo Learning Jev - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=WiblSpbLZrs" ADD_DATE="1791109125">How Memory Works in LangGraph | AI Agents with Memory - YouTube</A>
+<DT><A HREF="https://www.google.com/search?q=Industrial+Safety+%26+Inventory+Monitor+Bot+github&sca_esv=b580cfcf0a55f1a6&sxsrf=APpeQnuYn4mfIEEnSysv-VE8UXQ9EdvpuA%3A1791148999468&ei=x8PCapOIHLaO3boP-9m7kQI&biw=1366&bih=641&uact=5&oq=Industrial+Safety+%26+Inventory+Monitor+Bot+github&gs_lp=Egxnd3Mtd2l6LXNlcnAiMEluZHVzdHJpYWwgU2FmZXR5ICYgSW52ZW50b3J5IE1vbml0b3IgQm90IGdpdGh1YjIIEAAYgAQYogQyBRAAGO8FMgUQABjvBTIFEAAY7wVIkBJQ7QZYuw9wAXgBkAEAmAGzA6ABzA-qAQcyLTYuMC4xuAEDyAEA-AEBmAIIoAK5EMICChAAGEcY1gQYsAPCAgUQIRigAcICBxAhGAoYoAHCAgQQIRgVmAMAiAYBkAYIkgcJMS4wLjYuMC4xoAeRFLIHBzItNi4wLjG4B6UQwgcFMi02LjLIBziACAE&sclient=gws-wiz-serp" ADD_DATE="1791149698">Industrial Safety &amp; Inventory Monitor Bot github - Google Search</A>
+<DT><A HREF="https://www.youtube.com/watch?v=jQWenzVMbgI" ADD_DATE="1791238946">(28) Multi-Agent Systems in LangGraph | Specialized AI Orchestration - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=vhRWXaXD28o" ADD_DATE="1791379338">MCP 2026 Update Explained: Stateless MCP, Tasks, MRTR &amp; More! - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=Kx3Lm2hR2JY" ADD_DATE="1791379348">MCP Security Explained: 5 Attacks Every AI Developer Must Know - YouTube</A>
+<DT><A HREF="https://github.com/mksglu/context-mode" ADD_DATE="1791493064">mksglu/context-mode: Context window optimization for AI coding agents. Sandboxes tool output (98% reduction), persists session memory, and enforces routing across 17 platforms via MCP + hooks.</A>
+<DT><A HREF="https://www.youtube.com/watch?v=vWHMCrT8CI8" ADD_DATE="1791593075">Mem0: Long-Term Memory for AI Agents — Full Paper Breakdown + Local RTX 4090 Demo - YouTube</A>
+<DT><A HREF="https://marketscanner.com.au/" ADD_DATE="1791656614">MarketScanner | Quantitative Research &amp; Market Analytics</A>
+<DT><A HREF="https://www.youtube.com/shorts/6XiP3t8sxqE" ADD_DATE="1792028508">When your cats been practicing on you for the real fight. 😅 #shorts #Cat #wildlife #animalplanet - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=eL9BRo-eFYY" ADD_DATE="1792369239">Build an AI Agent Evaluation System with DeepEval &amp; LangChain (Full Project, step-by-step) - YouTube</A>
+<DT><A HREF="https://www.youtube.com/watch?v=n_Oc-Wq_KqI" ADD_DATE="1792369384">RAG LangChain Chatbot FULL PROJECT (Step-by-Step) - YouTube</A>
+<DT><A HREF="https://github.com/mysleekdesigns/crawlforge-mcp" ADD_DATE="1792639731">mysleekdesigns/crawlforge-mcp: 31 MCP too
+ls that give Claude, Cursor and any MCP client the live web — scrape, crawl, search, real Google rank, change tracking, document parsing, plus an autonomous agent that researches from a plain-English prompt with no URLs. Clean Markdown and schema-validated JSON, not raw HTML. Local-Ollama extraction by default. MIT, 1,000 free credits.</A>
+<DT><A HREF="https://www.youtube.com/watch?v=x50MJN6HVgs" ADD_DATE="1792732557">(4) Top Dev Tool Projects : vLLM, Supabase, ComfyUI, Twenty, mineflayer &amp; OpenCode - YouTube</A></script>
+
+</body>
+</html>
+
